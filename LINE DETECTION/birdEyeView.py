@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 import time
+import math as m
 # import matplotlib.pyplot as plt
 
-path = "./road.mp4"
+path = "./road1.mp4"
 cap = cv2.VideoCapture(path)
 i = 0
 
@@ -58,13 +59,24 @@ while (cap.isOpened()):
 	mask1 = cv2.inRange(hsv, lower1, higher1)
 	#----------------
 
-	kernel = np.ones((5, 5), np.uint8)
+	kernel = np.ones((3, 3), np.uint8)
 	mask0 = cv2.dilate(mask0, kernel, iterations=1)
 	mask1 = cv2.dilate(mask1, kernel, iterations=1)
-	# cv2.imshow("ddd", mask1)
+	mask2 = np.zeros_like(mask1)
+	lines0 = cv2.HoughLinesP(mask1,1,np.pi/180,50,maxLineGap = 60)
+	if lines0 is not None:
+		for line0 in lines0:
+			x10,y10,x20,y20  = line0[0]
+			angle = m.atan2(y20-y10, x20-x10)
+			angle = angle*180/m.pi
+			if (angle>70 and angle<110) or (angle>-110 and angle<-70):
+				cv2.line(mask2,(x10,y10),(x20,y20),255,6)
+			else:
+				print(angle)
+	cv2.imshow("ddd", mask2)
 	#-----------------------------------------------------------------------------
 	# cv2.imshow("ddd", mask0)
-	# cv2.waitKey(0)
+	cv2.waitKey(0)
 	# exit()
 	contours1, hierarchy = cv2.findContours(mask1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 	contours, hierarchy = cv2.findContours(mask0,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
