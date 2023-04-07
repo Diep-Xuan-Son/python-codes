@@ -19,13 +19,10 @@ while (cap.isOpened()):
         mask0 = cv.inRange(hsv, lower0, higher0)
         canny0 = cv.Canny(mask0,90,100)
         lines0 = cv.HoughLinesP(canny0,1,np.pi/180,50,maxLineGap = 60)
-        print(lines0)
-        x10,y10,x20,y20  = lines0[1][0]
-        cv.line(vid,(x10,y10),(x20,y20),(0,0,255),6)
-        # if lines0 is not None:
-        #     for line0 in lines0:
-        #         x10,y10,x20,y20  = line0[0]
-        #         cv.line(vid,(x10,y10),(x20,y20),(0,0,255),6)
+        if lines0 is not None:
+            for line0 in lines0:
+                x10,y10,x20,y20  = line0[0]
+                cv.line(vid,(x10,y10),(x20,y20),(0,0,255),6)
 
         lower = np.array([60,0,220])
         higher = np.array([150, 25, 255])
