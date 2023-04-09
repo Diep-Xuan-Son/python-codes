@@ -24,12 +24,7 @@ while (cap.isOpened()):
 	Minv = cv2.getPerspectiveTransform(dst, src) # Inverse transformation
 
 	image = image[2*(IMAGE_H//3):IMAGE_H, 0:IMAGE_W] # Apply np slicing for ROI crop
-	cv2.circle(image,(4*IMAGE_W//10,image.shape[0]), 5, (0,255,0), -1)
-	cv2.circle(image,(6*IMAGE_W//10,image.shape[0]), 5, (0,255,0), -1)
-	# cv2.imshow("aaa", image0)
-	# cv2.imshow("ddd", image)
-	# cv2.waitKey(0)
-	# exit()
+
 	point = (4*IMAGE_W//10,image.shape[0])
 	px = (M[0][0]*point[0] + M[0][1]*point[1] + M[0][2]) / ((M[2][0]*point[0] + M[2][1]*point[1] + M[2][2]))	#calculate x coordinate after perspective for point
 	py = (M[1][0]*point[0] + M[1][1]*point[1] + M[1][2]) / ((M[2][0]*point[0] + M[2][1]*point[1] + M[2][2]))
@@ -39,6 +34,14 @@ while (cap.isOpened()):
 	px1 = (M[0][0]*point1[0] + M[0][1]*point1[1] + M[0][2]) / ((M[2][0]*point1[0] + M[2][1]*point1[1] + M[2][2]))	#calculate x coordinate after perspective for point
 	py1 = (M[1][0]*point1[0] + M[1][1]*point1[1] + M[1][2]) / ((M[2][0]*point1[0] + M[2][1]*point1[1] + M[2][2]))
 	point_transform_right = (int(px1), int(py1))
+
+	cv2.circle(image,point, 5, (0,255,0), -1)
+	cv2.circle(image,point1, 5, (0,255,0), -1)
+	# cv2.imshow("aaa", image0)
+	# cv2.imshow("ddd", image)
+	# cv2.waitKey(0)
+	# exit()
+
 	warped_img = cv2.warpPerspective(image, M, (IMAGE_W, IMAGE_H)) # Image warping
 	#----------------------------------------------------------------------------
 	warped_img0 = warped_img.copy()
@@ -86,15 +89,26 @@ while (cap.isOpened()):
 			countour_max = ctr
 	contour = countour_max
 	#----------------------draw box for contour-----------------------
-	perimeter = cv2.arcLength(contour, True)
-	approx = cv2.approxPolyDP(contour, 0.02*perimeter, True)
-	x,y,w,h = cv2.boundingRect(approx)
-	cv2.rectangle(warped_img0, (x,y), (x+w, y+h), (0, 255, 0), 1)
-	cv2.drawContours(warped_img0, contours, -1, (0,255,0), 2)	#71 ,91, 371
+	#--------minbox---------
+	rect = cv2.minAreaRect(contour)
+	cenx, ceny = rect[0][0], rect[0][1]
+	print(cenx, ceny)
+	box = cv2.boxPoints(rect)
+	box = np.int0(box)
+	cv2.drawContours(warped_img0, [box], -1, (0,0,255), 2)	#71 ,91, 371
+	#----------------------
+	# perimeter = cv2.arcLength(contour, True)
+	# approx = cv2.approxPolyDP(contour, 0.02*perimeter, True)
+	# x,y,w,h = cv2.boundingRect(approx)
+	# cv2.rectangle(warped_img0, (x,y), (x+w, y+h), (0, 255, 0), 1)
+	# cv2.drawContours(warped_img0, contours, -1, (0,255,0), 2)	#71 ,91, 371
 	for ctr1 in contours1:
 		cv2.drawContours(warped_img0, contours1, -1, (0,255,0), 2)	#71 ,91, 371
 	#-----------------------------------------------------------------
-	if ((x+w/2) > (point_transform_left[0]) and (x+w/2) < 640) or ((x+w/2) < (point_transform_right[0]) and (x+w/2) > 640):
+	# if ((x+w/2) > (point_transform_left[0]) and (x+w/2) < 640) or ((x+w/2) < (point_transform_right[0]) and (x+w/2) > 640):	
+	# 	print("wrong_lane")
+	print(point_transform_left[0])
+	if (cenx > (point_transform_left[0]) and cenx < 640) or (cenx < (point_transform_right[0]) and cenx > 640):		#for min box
 		print("wrong_lane")
 	print("-------Duration: ", time.time() - start_time)
 
