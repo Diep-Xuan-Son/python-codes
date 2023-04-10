@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import MinMaxScaler
-from collections import defaultdict
+# from sklearn.cluster import DBSCAN
+# from sklearn.preprocessing import MinMaxScaler
+# from collections import defaultdict
 from scipy.linalg import block_diag
 import time
 # from __future__ import division
@@ -136,8 +136,10 @@ class LaneDetector:
         roiy_end = frame.shape[0]
         roix_end = frame.shape[1]
         roi = img[self.road_horizon:roiy_end, 0:roix_end]
+        cv2.imshow("sdf", roi)
         blur = cv2.medianBlur(roi, 5)
         contours = cv2.Canny(blur, 60, 120)
+        cv2.imshow("ascs", contours)
 
         if self.prob_hough:
             lines = cv2.HoughLinesP(contours, 1, np.pi/180, self.vote, minLineLength=30, maxLineGap=100)
@@ -385,7 +387,7 @@ def IPM(image,ROI_points):
     
     return ipm_out
 #capturing video
-cap = cv2.VideoCapture('road.mp4')
+cap = cv2.VideoCapture('road3.mp4')
 # vidsize = (640,480,3)
 
 #out = cv2.VideoWriter('final_kalman_night.avi', -1, 40.0, None, True)
